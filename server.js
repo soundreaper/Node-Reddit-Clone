@@ -28,10 +28,10 @@ app.engine('handlebars', exphbs({
 // Use handlebars to render
 app.set('view engine', 'handlebars');
 
-app.use(cookieParser()); // Add this after you initialize express.
-
 // Set db
 require('./data/reddit-db');
+
+app.use(cookieParser()); // Add this after you initialize express.
 
 // Tell our app to send the "hello world" message to our home page
 // app.get('/', (req, res) => {
