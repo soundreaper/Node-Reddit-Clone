@@ -1,4 +1,7 @@
-// Initialize express
+require('dotenv').config();
+// Initialize
+var cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const express = require('express')
 const Handlebars = require('handlebars')
 const app = express()
@@ -25,6 +28,8 @@ app.engine('handlebars', exphbs({
 // Use handlebars to render
 app.set('view engine', 'handlebars');
 
+app.use(cookieParser()); // Add this after you initialize express.
+
 // Set db
 require('./data/reddit-db');
 
@@ -39,6 +44,7 @@ app.get('/posts/new', (req,res) =>{
 
 require('./controllers/posts.js')(app);
 require('./controllers/comments.js')(app);
+require('./controllers/auth.js')(app);
 
 // Choose a port to listen on
 const port = process.env.PORT || 3000;
