@@ -1,64 +1,77 @@
+// Initialize express
+const express = require('express')
+const app = express()
+const path = require('path')
 require('dotenv').config();
-// Initialize
+
+// get data back from db 
+const handlebars = require('handlebars');
+const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access');
+const exphbs = require('express-handlebars');
+const hbs = exphbs.create({
+    defaultLayout: 'main',
+    handlebars: allowInsecurePrototypeAccess(handlebars),
+});
+
+// Models
+const Post = require('./models/post')
+const Comment = require('./models/comment')
+
+// Database
+const database = require('./data/reddit-db')
+
+// Middleware
+const bodyParser = require('body-parser')
+const expressValidator = require('express-validator')
+const bcrypt = require('bcryptjs')
 var cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
-const express = require('express')
-const Handlebars = require('handlebars')
-const app = express()
-const bodyParser = require('body-parser');
-const expressValidator = require('express-validator');
+
+// Controllers
+const posts = require('./controllers/posts.js')
+const comments = require('./controllers/comments.js')
+const auth = require('./controllers/auth.js')
+const replies = require('./controllers/replies.js')
+
+app.engine('handlebars', hbs.engine);
+
+// Use handlebars to render
+app.set('view engine', 'handlebars');
 
 var checkAuth = (req, res, next) => {
   console.log("Checking authentication");
-  if (typeof req.cookies.nToken === "undefined" || req.cookies.nToken === null) {
+
+
+
+  // if (typeof req.cookies === "undefined" || typeof req.cookies.nToken === "undefined" || req.cookies.nToken === null) {
+    if (typeof req.cookies.nToken === "undefined" || req.cookies.nToken === null) {
+      console.log("cookie is undefined")
     req.user = null;
   } else {
+    console.log("cookie is defined")
+
     var token = req.cookies.nToken;
     var decodedToken = jwt.decode(token, { complete: true }) || {};
+    console.log(decodedToken.payload)
     req.user = decodedToken.payload;
   }
 
   next();
 };
 
-// Use Body Parser
+app.use(cookieParser())
+
+// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-// Add after body parser initialization!
-app.use(expressValidator());
-
-const exphbs = require('express-handlebars');
-const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
-
-// Use "main" as our default layout
-app.engine('handlebars', exphbs({
-  handlebars: allowInsecurePrototypeAccess(Handlebars),
-  defaultLayout: 'main'
-  })
-);
-
-// Use handlebars to render
-app.set('view engine', 'handlebars');
-
-// Set db
-require('./data/reddit-db');
-
-app.use(cookieParser()); // Add this after you initialize express.
-
-// Tell our app to send the "hello world" message to our home page
-// app.get('/', (req, res) => {
-//   res.render('index');
-// })
-
-app.get('/posts/new', (req,res) =>{
-  res.render('posts-new')
-})
-
+app.use(expressValidator())
 app.use(checkAuth);
-require('./controllers/posts.js')(app);
-require('./controllers/comments.js')(app);
-require('./controllers/auth.js')(app);
+
+// Access controllers & database
+app.use(posts)
+app.use(comments)
+app.use(auth)
+app.use(express.static('public'));
 
 // Choose a port to listen on
 const port = process.env.PORT || 3000;
