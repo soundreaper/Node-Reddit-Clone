@@ -1,5 +1,6 @@
 // Initialize express
 const express = require('express')
+const Handlebars = require('handlebars')
 const app = express()
 const bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
@@ -12,9 +13,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(expressValidator());
 
 const exphbs = require('express-handlebars');
+const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
 
 // Use "main" as our default layout
-app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
+app.engine('handlebars', exphbs({
+  handlebars: allowInsecurePrototypeAccess(Handlebars),
+  defaultLayout: 'main'
+  })
+);
+
 // Use handlebars to render
 app.set('view engine', 'handlebars');
 
