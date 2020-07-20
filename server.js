@@ -22,9 +22,9 @@ app.set('view engine', 'handlebars');
 require('./data/reddit-db');
 
 // Tell our app to send the "hello world" message to our home page
-app.get('/', (req, res) => {
-  res.render('index');
-})
+// app.get('/', (req, res) => {
+//   res.render('index');
+// })
 
 app.get('/posts/new', (req,res) =>{
   res.render('posts-new')
