@@ -38,6 +38,7 @@ app.get('/posts/new', (req,res) =>{
 })
 
 require('./controllers/posts.js')(app);
+require('./controllers/comments.js')(app);
 
 // Choose a port to listen on
 const port = process.env.PORT || 3000;
